@@ -1,0 +1,72 @@
+<html>
+    <head>
+        <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+        <script>
+            const ably = new Ably.Realtime.Promise({ authUrl : '/auth/token' });
+
+            const initializeClient = async () => {
+                // For the full code sample see here: https://github.com/ably/quickstart-js
+                await ably.connection.once('connected');
+                console.log('Connected to Ably!');
+
+                channel = ably.channels.get('quickstart');
+
+                await channel.subscribe('broadcast', (message) => {
+                    console.log('Received a greeting message in realtime: ' + message.data)
+                    messagesElement.innerHTML += `<li>${message.data}</li>`
+                });
+            }
+        </script>
+        <script>
+            const sendMessage = async () => {
+                await channel.publish('broadcast', messageElement.value);
+                messageElement.value = '';
+            }
+        </script>
+       <style>
+       * {
+         box-sizing: border-box;
+       }
+       
+       /* Create two unequal columns that floats next to each other */
+       .column {
+         float: left;
+         padding: 10px;
+         height: 300px; /* Should be removed. Only for demonstration */
+       }
+       
+       .left {
+         width: 25%;
+       }
+       
+       .right {
+         width: 75%;
+       }
+       
+       /* Clear floats after the columns */
+       .row:after {
+         content: "";
+         display: table;
+         clear: both;
+       }
+       </style>
+    </head>
+    <body>
+        <div class="row">
+            <div class="column left" style="background-color:#aaa;">
+                <input type="text" id="message" />
+                <button type="button" onclick="sendMessage()">Send</button>
+            </div>
+            <div class="column right" style="background-color:#bbb;">
+                <ul id="messages"></ul>
+            </div>
+        </div>
+    </body>
+    <script>
+        const messageElement = document.querySelector('#message')
+        const messagesElement = document.querySelector('#messages')
+        let channel = null;
+
+        initializeClient();
+    </script>
+</html>
